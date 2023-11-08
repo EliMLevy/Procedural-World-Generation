@@ -62,6 +62,7 @@ export default class Chunkloader {
         } 
 
         let val = tile.valueOf(offsetX, offsetY);
+        // console.log(val)
         if(val == 1 || val == 4) return true;
         else return false;
 
@@ -72,14 +73,11 @@ export default class Chunkloader {
             this.tileLookupTable.set(tile.x, new Map());
         }
         this.tileLookupTable.get(tile.x).set(tile.y, tile);
-        // this.tileLookupTable[tile.x].set(tile.y, tile);
-        // this.tileLookupTable[tile.x][tile.y] = tile;
-        // console.log("Adding", tile.x, tile.y, this.tileLookupTable)
     }
 
     removeFromLookupTable(tile: Tile) {
         if (!this.tileLookupTable.has(tile.x)) {
-            return;
+            throw new Error("Tried removing tile that was not loaded." + JSON.stringify(tile))
         }
 
         this.tileLookupTable.get(tile.x).delete(tile.y);
@@ -112,45 +110,32 @@ export default class Chunkloader {
     }
 
     updateLoadedChunks(p5: P5, playerXChunk: number, playerYChunk: number) {
-        if (playerXChunk - this.loadedCenter.x > 0) {
-            // Load chunks to the right
+        if (playerXChunk - this.loadedCenter.x > 0 || playerXChunk - this.loadedCenter.x < 0) {
+            // Load chunks to the right or left
+            let dir = playerXChunk - this.loadedCenter.x > 0 ? 1 : -1;
+
             for (let i = -this.loadedRadiusY; i <= this.loadedRadiusY; i++) {
-                let newTileChunkX = playerXChunk + this.loadedRadiusX;
+                let newTileChunkX = playerXChunk + dir * this.loadedRadiusX;
                 let newTileChunkY = playerYChunk + i;
-                let tile = new Tile(p5, newTileChunkX, newTileChunkY, this.scl, this.worldGenerator);
-                this.loadedTiles.push(tile);
-                this.addToLookupTable(tile)
-            }
-        }
-        if (playerXChunk - this.loadedCenter.x < 0) {
-            // Load chunks to the left
-            for (let i = -this.loadedRadiusY; i <= this.loadedRadiusY; i++) {
-                let newTileChunkX = playerXChunk - this.loadedRadiusX;
-                let newTileChunkY = playerYChunk + i;
-                let tile = new Tile(p5, newTileChunkX, newTileChunkY, this.scl, this.worldGenerator);
-                this.loadedTiles.push(tile);
-                this.addToLookupTable(tile)
+                if(!this.tileLookupTable.has(newTileChunkX) || !this.tileLookupTable.get(newTileChunkX).has(newTileChunkY)) {
+                    let tile = new Tile(p5, newTileChunkX, newTileChunkY, this.scl, this.worldGenerator);
+                    this.loadedTiles.push(tile);
+                    this.addToLookupTable(tile);
+                }
             }
         }
 
-        if (playerYChunk - this.loadedCenter.y > 0) {
-            // Load chunks downward
+        if (playerYChunk - this.loadedCenter.y > 0 || playerYChunk - this.loadedCenter.y < 0) {
+            // Load chunks downward or upward
+            let dir = playerYChunk - this.loadedCenter.y > 0 ? 1 : -1;
             for (let i = -this.loadedRadiusX; i <= this.loadedRadiusX; i++) {
                 let newTileChunkX = playerXChunk + i;
-                let newTileChunkY = playerYChunk + this.loadedRadiusY;
-                let tile = new Tile(p5, newTileChunkX, newTileChunkY, this.scl, this.worldGenerator);
-                this.loadedTiles.push(tile);
-                this.addToLookupTable(tile)
-            }
-        }
-        if (playerYChunk - this.loadedCenter.y < 0) {
-            // Load chunks above
-            for (let i = -this.loadedRadiusX; i <= this.loadedRadiusX; i++) {
-                let newTileChunkX = playerXChunk + i;
-                let newTileChunkY = playerYChunk - this.loadedRadiusY;
-                let tile = new Tile(p5, newTileChunkX, newTileChunkY, this.scl, this.worldGenerator);
-                this.loadedTiles.push(tile);
-                this.addToLookupTable(tile)
+                let newTileChunkY = playerYChunk + dir * this.loadedRadiusY;
+                if(!this.tileLookupTable.has(newTileChunkX) || !this.tileLookupTable.get(newTileChunkX).has(newTileChunkY)) {
+                    let tile = new Tile(p5, newTileChunkX, newTileChunkY, this.scl, this.worldGenerator);
+                    this.loadedTiles.push(tile);
+                    this.addToLookupTable(tile);
+                }
             }
         }
         // Shift the player center
