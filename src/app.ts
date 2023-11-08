@@ -67,7 +67,7 @@ new P5((p5: P5) => {
         p5.fill(255);
         p5.stroke(0);
         p5.strokeWeight(1);
-        p5.text("FPS: " + p5.frameRate(), 10, 20);
+        p5.text("FPS: " + Math.floor(p5.frameRate()), 10, 20);
         p5.text("Loaded Chunks: " + chunkLoader.loadedTiles.length, 10, 40);
     }
 
