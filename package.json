@@ -1,0 +1,18 @@
+{
+  "name": "proceduralgeneration",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild ./src/app.ts --bundle --outfile=./build/index.js",
+    "dev": "esbuild ./src/app.ts --bundle --outfile=./build/index.js --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/p5": "^1.7.3",
+    "esbuild": "0.19.5",
+    "p5": "^1.8.0"
+  }
+}
