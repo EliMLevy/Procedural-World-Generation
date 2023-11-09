@@ -18,11 +18,11 @@ export default class WorldGenerator {
     forestThreshold: number = 65;
     desertThreshold: number = 190;
 
-    OCEAN: number = 0;
-    LAND: number = 1;
-    TREE: number = 2;
-    ROCK: number = 3;
-    SAND: number = 4;
+    static OCEAN: number = 0;
+    static LAND: number = 100;
+    static TREE: number = 200;
+    static ROCK: number = 300;
+    static SAND: number = 400;
 
     constructor(scl: number, pointsPerChunkRow: number) {
         this.scl = scl;
@@ -36,40 +36,105 @@ export default class WorldGenerator {
             result[(j - y) / delta] = [];
             for (let i = x; i < x + this.scl; i += delta) {
                 result[(j - y) / delta][(i - x) / delta] = this.evaluate(p5, i, j);
-                // let ocean = this.isOcean(p5, i, j);
-
-                // if (ocean) {
-                //     result[(j - y) / delta][(i - x) / delta] = this.OCEAN;
-                // } else {
-                //     let r = Math.floor(p5.random(0, 100));
-                //     if (r < 90) {
-                //         result[(j - y) / delta][(i - x) / delta] = this.LAND;
-                //     } else if (r < 95) {
-                //         result[(j - y) / delta][(i - x) / delta] = this.TREE;
-                //     } else if (r < 100) {
-                //         result[(j - y) / delta][(i - x) / delta] = this.ROCK;
-                //     }
-                // }
             }
         }
 
         return result;
     }
 
+    // Evaluate without calculating the subtype
+    simpleEvaluation(p5: P5, x: number, y: number) {
+        // console.log(x, y)
+        p5.noiseSeed(110);
+        let ocean = p5.noise(x * this.noiseStep + 1_000_000, y * this.noiseStep + 1_000_000) * this.noiseScl;
+        if (ocean < this.waterThreshold) {
+            return WorldGenerator.OCEAN;
+        }
+
+        let biome = p5.noise(x * this.noiseStep - 6_023_000, y * this.noiseStep - 6_022_999.9) * this.noiseScl;
+        if (biome < this.forestThreshold) {
+            return WorldGenerator.TREE;
+        } else if (biome > this.desertThreshold) {
+            return WorldGenerator.SAND;
+        }
+
+        let r = p5.random(100);
+        if (r < 1) {
+            return WorldGenerator.ROCK;
+        } else if (r < 4) {
+            return WorldGenerator.TREE;
+        } else {
+            return WorldGenerator.LAND;
+        }
+    }
+
     evaluate(p5: P5, x: number, y: number) {
         // console.log(x, y)
         p5.noiseSeed(110);
         let ocean = p5.noise(x * this.noiseStep + 1_000_000, y * this.noiseStep + 1_000_000) * this.noiseScl;
-        if (ocean < this.waterThreshold) return this.OCEAN;
-        
-        
+        if (ocean < this.waterThreshold) {
+            return WorldGenerator.OCEAN + Math.floor(Math.random() * 4);
+        }
+
         let biome = p5.noise(x * this.noiseStep - 6_023_000, y * this.noiseStep - 6_022_999.9) * this.noiseScl;
-        if (biome < this.forestThreshold) return this.TREE;
-        else if(biome > this.desertThreshold) return this.SAND;
+        if (biome < this.forestThreshold) {
+            return WorldGenerator.TREE + this.findGrassSubType(p5, x, y);
+        } else if (biome > this.desertThreshold) {
+            return WorldGenerator.SAND;
+        }
 
         let r = p5.random(100);
-        if (r < 1) return this.ROCK;
-        else if (r < 4) return this.TREE;
-        else return this.LAND;
+        if (r < 1) {
+            return WorldGenerator.ROCK + this.findGrassSubType(p5, x, y);
+        } else if (r < 4) {
+            return WorldGenerator.TREE + this.findGrassSubType(p5, x, y);
+        } else {
+            let subtype = this.findGrassSubType(p5, x, y);
+            if(subtype == 4) {
+                if(r < 8) {
+                    subtype = 9 + Math.floor(Math.random() * 3);
+                }
+            }
+            return WorldGenerator.LAND + subtype;
+        }
+    }
+
+    findGrassSubType(p5: P5, x: number, y: number) {
+        let subtype = 0;
+
+        let delta = this.scl / WorldGenerator.pointsPerChunkRow;
+
+        let left = this.simpleEvaluation(p5, x - delta, y);
+        let right = this.simpleEvaluation(p5, x + delta, y);
+        let up = this.simpleEvaluation(p5, x, y - delta);
+        let down = this.simpleEvaluation(p5, x, y + delta);
+
+        if (left == WorldGenerator.OCEAN) {
+            if (up == WorldGenerator.OCEAN) {
+                subtype = 0;
+            } else if (down == WorldGenerator.OCEAN) {
+                subtype = 2;
+            } else {
+                subtype = 1;
+            }
+        } else if (right == WorldGenerator.OCEAN) {
+            if (up == WorldGenerator.OCEAN) {
+                subtype = 6;
+            } else if (down == WorldGenerator.OCEAN) {
+                subtype = 8;
+            } else {
+                subtype = 7;
+            }
+        } else {
+            if (up == WorldGenerator.OCEAN) {
+                subtype = 3;
+            } else if (down == WorldGenerator.OCEAN) {
+                subtype = 5;
+            } else {
+                subtype = 4;
+            }
+        }
+
+        return subtype;
     }
 }
