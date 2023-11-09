@@ -24,11 +24,6 @@ export default class Player {
     characterAtlas: P5.Image;
     defaultSpriteSlice: TextureSlice;
 
-    // standingFrontAnim: TextureSlice[];
-    // standingFrontAnimSpeed: number;
-
-    // standingBackAnim: TextureSlice[];
-    // standingBackAnimSpeed: number;
 
     constructor(x: number, y: number, w: number, h: number, spriteSheet: P5.Image, defaultSpriteSlice: TextureSlice) {
         this.x = x;
@@ -44,15 +39,6 @@ export default class Player {
         this.animations.set(state, new MyAnimation(frames, speed));
     }
 
-    // setStandingFrontAnim(frames: TextureSlice[], speed: number) {
-    //     this.standingFrontAnim = frames;
-    //     this.standingFrontAnimSpeed = speed;
-    // }
-
-    // setStandingBackAnim(frames: TextureSlice[], speed: number) {
-    //     this.standingBackAnim = frames;
-    //     this.standingBackAnimSpeed = speed;
-    // }
 
     display(p5: P5) {
         p5.push()

@@ -29,8 +29,11 @@ new P5((p5: P5) => {
     };
 
     p5.setup = () => {
-        let xChunks = p5.min(Math.floor(p5.windowWidth / scl), 5);
-        let yChunks = p5.min(Math.floor(p5.windowHeight / scl), 3);
+
+        console.log("Huge thanks to Cup Nooble for the game assets! You can find the original assets at https://cupnooble.itch.io/sprout-lands-asset-pack");
+
+        let xChunks = p5.min(Math.floor(p5.windowWidth / scl), 6);
+        let yChunks = p5.min(Math.floor(p5.windowHeight / scl), 4);
 
         const canvas = p5.createCanvas((xChunks * 2 - 1) * scl, (yChunks * 2 - 1) * scl);
         canvas.parent("app");
@@ -38,7 +41,7 @@ new P5((p5: P5) => {
         p5.randomSeed(110);
         p5.frameRate(30);
 
-        worldGenerator = new WorldGenerator(scl, scl / 25);
+        worldGenerator = new WorldGenerator(scl, scl / 50);
 
         console.log(xChunks, yChunks);
 
@@ -63,7 +66,7 @@ new P5((p5: P5) => {
         chunkLoader.setRock(treeAtlas, [new TextureSlice(127, 16, 17, 17)]);
         chunkLoader.setWater(waterAtlas, [new TextureSlice(0, 0, 16, 16), new TextureSlice(16, 0, 16, 16), new TextureSlice(32, 0, 16, 16), new TextureSlice(48, 0, 16, 16)]);
 
-        player = new Player(p5.width / 2, p5.height / 2, scl / 5, scl / 5, playerAtlas, new TextureSlice(15, 15, 18, 18));
+        player = new Player(p5.width / 2, p5.height / 2, scl / 3, scl / 3, playerAtlas, new TextureSlice(15, 15, 18, 18));
         player.addAnimation(Player.STANDING_FRONT, [new TextureSlice(15, 15, 18, 18), new TextureSlice(63, 15, 18, 18)], 0.1);
         player.addAnimation(Player.STANDING_BACK, [new TextureSlice(15, 15 + 48, 18, 18), new TextureSlice(63, 15 + 48, 18, 18)], 0.1);
         player.addAnimation(Player.STANDING_LEFT, [new TextureSlice(15, 15 + 48 + 48, 18, 18), new TextureSlice(63, 15 + 48 + 48, 18, 18)], 0.1);
@@ -118,7 +121,7 @@ new P5((p5: P5) => {
 
         chunkLoader.updateLoadedChunks(p5, playerChunk.x, playerChunk.y);
 
-        displayStats(p5);
+        // displayStats(p5);
     };
 
 
